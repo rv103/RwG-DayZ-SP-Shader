@@ -12,6 +12,9 @@ live preview of the DayZ **`_mc` macro**.
   **DayZ Macro (_mc)** group.
 - **`pbr-metal-rough-mc.glsl`** — the standard metal/rough shading **plus a live
   `_mc` macro preview**.
+- **`dayz-ingame.glsl`** (new) — a reimplementation of DayZ's actual Super shader
+  and in-game lighting, fed by your metal/rough channels converted live the way
+  the plugin exports them. See below.
 
 Both are **viewport only** — they change nothing on export. They're companions to
 the **RwG DayZ Texture Exporter** plugin: the DayZ shader's parameters mirror that
@@ -112,6 +115,51 @@ presets** and you have a matching pair on both sides.
 Load a DayZ-ish outdoor/overcast **HDRI** in Painter's *Display Settings* (a
 stand-in for the DayZ `env_land` cubemap) and tune exposure/rotation. The shader
 honours it through **env intensity**.
+
+---
+
+## `dayz-ingame.glsl` — DayZ in-game preview
+
+Keep painting metal/rough — materials and smart materials work unchanged. Per
+pixel, the shader does what the export + the game would do:
+
+1. **PBR → DayZ maps**, same as the plugin's *DayZ shader-matched* `_smdi`
+   method: `_co` = base colour, `_smdi` B = `(2/r⁴ − 2) / specularPower`,
+   `_smdi` G = PBR F0 / F0 of `fresnel(N,K)` (× B with energy normalisation),
+   `_as` G = AO, Painter's normal = `_nohq`.
+2. **DayZ Super shader** with those maps: hemispherical sky/ground ambient,
+   back light, Blinn-Phong with the engine's specular scale over
+   `specularPower`, the physical complex-IOR `fresnel(N,K)` stage, terminator,
+   AO and shadow handling like the game.
+3. **In-game light**, measured with RenderDoc in DayZ 1.30: sun, sky and ground
+   colours for clear day, morning, evening, dusk, overcast, half overcast,
+   full-moon night, moonless night and the inventory preview. Sun elevation is
+   raised to ≥ 15° like in the engine; the direction follows Painter's
+   environment rotation (Shift + drag). Output is clamped like the game's 8-bit
+   scene buffer, then DayZ's filmic tone curve (not in the inventory preview).
+
+**Display settings:** this shader already outputs the final DayZ image. In
+*Display Settings*, set tone mapping to **Linear** / no tone mapping and turn
+Painter's post effects (bloom, glare, colour correction, vignette) off, or the
+image gets tone-mapped twice.
+
+**Reflections:** by default Painter's HDRI (clamped to 0…1 like DayZ's LDR env
+maps). For the real look, convert a DayZ `env_*_co.paa` to PNG, load it into
+*Environment texture* and enable *Use environment texture*.
+
+| Group | Parameters |
+|---|---|
+| DayZ rvmat | `ambient[]`, `diffuse[]`, `forcedDiffuse[]`, `emmisive[]`, `specular[]`, `specularPower`, `fresnel N/K` — enter the values the plugin writes |
+| PBR to DayZ | `_smdi` method, energy normalisation, G/B sliders, macro preview (User0–2) |
+| DayZ light | light preset, direction from environment, exposure (EV), environment texture, filmic on/off |
+| Debug | view `_co`, `_smdi` G, `_smdi` B, Fresnel stage, G × Fresnel, lighting only |
+
+**With the RwG DayZ Painter plugin:** tick *Live to DayZ In-Game shader* in its
+RVMAT tab and the rvmat values, `_smdi` method, G/B sliders and macro source are
+sent to this shader while you edit; *From shader* copies values you tried here
+back into the plugin.
+
+Not included: bloom, point lights, the game's eye adaptation over time.
 
 ---
 
