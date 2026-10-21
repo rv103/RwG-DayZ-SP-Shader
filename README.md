@@ -1,24 +1,25 @@
 # RwG DayZ Substance Painter viewport shaders
 
-> **Preview · v0.1.0**
+> **v0.2.0** — new `dayz-ingame` shader: DayZ's Super shader and measured
+> in-game light, driven live by the RwG DayZ Texture Exporter.
 
-Two custom **Substance 3D Painter** viewport shaders for DayZ authoring. You keep
+Custom **Substance 3D Painter** viewport shaders for DayZ authoring. You keep
 painting in the normal **PBR metal/rough** workflow; these change how Painter
-*previews* the surface — closer to how DayZ will actually render it, and with a
-live preview of the DayZ **`_mc` macro**.
+*previews* the surface — the way DayZ will actually render it, and with a live
+preview of the DayZ **`_mc` macro**.
 
-- **`dayz-super.glsl`** — previews the DayZ / Enfusion **"Super" shading** (a
-  Fresnel-N/K driven, tinted specular, gloss from `1 − roughness`), plus a
-  **DayZ Macro (_mc)** group.
+- **`dayz-ingame.glsl`** — a reimplementation of DayZ's actual Super shader and
+  in-game lighting, fed by your metal/rough channels converted live the way the
+  plugin exports them. **The recommended one.** See below.
 - **`pbr-metal-rough-mc.glsl`** — the standard metal/rough shading **plus a live
   `_mc` macro preview**.
-- **`dayz-ingame.glsl`** (new) — a reimplementation of DayZ's actual Super shader
-  and in-game lighting, fed by your metal/rough channels converted live the way
-  the plugin exports them. See below.
+- **`dayz-super.glsl`** — the older HDRI-based approximation of the Super
+  shading (Fresnel-N/K tinted specular, gloss from `1 − roughness`), plus a
+  **DayZ Macro (_mc)** group.
 
-Both are **viewport only** — they change nothing on export. They're companions to
-the **RwG DayZ Texture Exporter** plugin: the DayZ shader's parameters mirror that
-plugin's `.rvmat` editor.
+All are **viewport only** — they change nothing on export. They're companions to
+the **[RwG DayZ Texture Exporter](https://github.com/rv103/RwG_DayZ_Painter_Plugin)**
+plugin: the DayZ shaders' parameters mirror that plugin's `.rvmat` editor.
 
 ---
 
@@ -154,21 +155,25 @@ maps). For the real look, convert a DayZ `env_*_co.paa` to PNG, load it into
 | DayZ light | light preset, direction from environment, exposure (EV), environment texture, filmic on/off |
 | Debug | view `_co`, `_smdi` G, `_smdi` B, Fresnel stage, G × Fresnel, lighting only |
 
-**With the RwG DayZ Painter plugin:** tick *Live to DayZ In-Game shader* in its
-RVMAT tab and the rvmat values, `_smdi` method, G/B sliders and macro source are
-sent to this shader while you edit; *From shader* copies values you tried here
-back into the plugin.
+**With the RwG DayZ Texture Exporter (v0.6.0+):** tick *Live to DayZ In-Game
+shader* in its RVMAT tab (or click *To shader*) and the rvmat values and macro
+source go to this shader while you edit. They go to the shader instance of the
+**active texture set**; a texture set sharing its instance with others (or still
+on Painter's "Main shader") first gets its own copy, `DayZ <texture set>` — so
+body, stock and magazine of a weapon each keep their own material. Values edited
+in the DayZ Material Viewer come back through the plugin too.
 
-Not included: bloom, point lights, the game's eye adaptation over time.
+Not included: bloom, point lights, SSAO, the game's eye adaptation over time.
 
 ---
 
 ## Which shader to use
 
+- **Look-dev'ing a DayZ material (metal colour, gloss, fresnel) before you
+  export the `.rvmat`?** → `dayz-ingame`, linked to the plugin.
 - **Just painting a normal asset and want to spot your `_mc` accents?** →
   `pbr-metal-rough-mc`.
-- **Look-dev'ing a DayZ material (metal colour, gloss, fresnel) before you
-  export the `.rvmat`?** → `dayz-super` (it also has the macro preview).
+- `dayz-super` — only for projects already set up with it.
 
 ---
 

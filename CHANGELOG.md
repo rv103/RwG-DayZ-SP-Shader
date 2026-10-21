@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.2.0 (2026-10-21)
+
+- **`dayz-ingame.glsl`** (new) — a reimplementation of DayZ's Super shader and
+  in-game light, measured with RenderDoc: metal/rough channels converted per pixel
+  like the RwG exporter (`_co` = base colour, DayZ shader-matched `_smdi`,
+  `_as` = AO), sky/ground ambient, engine specular scale, physical complex-IOR
+  `fresnel(N,K)`, nine light presets (clear day to moonless night, inventory
+  preview), 8-bit clamp and DayZ's filmic tone curve, optional DayZ env texture,
+  debug views.
+- **Plugin link** (RwG DayZ Texture Exporter v0.6.0): *Live to DayZ In-Game
+  shader* / *To shader* send the rvmat values to the active texture set's
+  instance; shared instances are split into `DayZ <texture set>`.
+- `dayz-super` stays as the older approximation.
+
 ## v0.1.0 — Preview (2026-08-15)
 
 First release — two Substance 3D Painter viewport shaders for DayZ authoring.

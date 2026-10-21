@@ -1,6 +1,7 @@
 # Install — RwG DayZ Substance Painter shaders
 
-Applies to both **`dayz-super.glsl`** and **`pbr-metal-rough-mc.glsl`**.
+Applies to **`dayz-ingame.glsl`**, **`pbr-metal-rough-mc.glsl`** and
+**`dayz-super.glsl`**.
 
 ## 1. Copy the shader(s) into a Painter shelf
 
@@ -24,14 +25,20 @@ Painter caches the compiled shader.
 
 ## 3. Assign it to your texture set
 
-**Texture Set Settings → Shader** dropdown → pick **`dayz-super`** or
-**`pbr-metal-rough-mc`**. The viewport switches immediately.
+**Texture Set Settings → Shader** dropdown → pick **`dayz-ingame`** (or
+`pbr-metal-rough-mc` / `dayz-super`). The viewport switches immediately.
+
+For `dayz-ingame`: in **Display Settings** set tone mapping to **Linear** and
+turn Painter's post effects off — the shader already outputs the final DayZ image.
+With the RwG DayZ Texture Exporter (v0.6.0+), tick *Live to DayZ In-Game shader*
+in its RVMAT tab; each texture set gets its own shader instance.
 
 ## 4. Tune the parameters
 
 The shader's controls appear in **Shader Settings** (bottom of Texture Set
 Settings):
 
+- `dayz-ingame` — groups **DayZ rvmat / PBR to DayZ / DayZ light / Debug**.
 - `dayz-super` — groups **DayZ Material / DayZ Specular / DayZ Environment / DayZ
   Macro (_mc)**.
 - `pbr-metal-rough-mc` — group **Macro (_mc) preview**.
