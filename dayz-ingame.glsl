@@ -88,7 +88,7 @@ uniform int u_light;
 uniform bool u_dir_from_env;
 //: param custom { "default": 0.0, "label": "Exposure (EV)", "min": -4.0, "max": 4.0, "group": "DayZ light" }
 uniform float u_ev;
-//: param custom { "default": "", "label": "Environment texture (env_*_co as PNG, optional)", "usage": "texture", "group": "DayZ light" }
+//: param custom { "default": "", "label": "Environment texture (env_*_co; the plugin sets the rvmat's one)", "usage": "texture", "group": "DayZ light" }
 uniform sampler2D u_env_tex;
 //: param custom { "default": false, "label": "Use environment texture (else Painter's HDRI)", "group": "DayZ light" }
 uniform bool u_use_env_tex;
@@ -160,6 +160,11 @@ vec3 filmic(vec3 x)
 }
 
 float perceived(vec3 c) { return sqrt(0.299 * c.r * c.r + 0.587 * c.g * c.g + 0.114 * c.b * c.b); }
+
+vec3 srgbToLinear(vec3 c)
+{
+    return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), c));
+}
 
 vec3 sampleMacro(SparseCoord coord)
 {
@@ -240,8 +245,9 @@ void shade(V2F inputs)
 
     vec3 R = reflect(-V, N);
     float mip = pow(1.0 - clamp(power / 2048.0, 0.0, 1.0), 8.0);
+    // The game binds the env map (Stage7, env_*_co) as sRGB: decoded here too (a custom texture comes raw).
     vec3 env = u_use_env_tex
-        ? textureLod(u_env_tex, R.xy * 0.5 + 0.5, mip * 10.0).rgb
+        ? srgbToLinear(textureLod(u_env_tex, R.xy * 0.5 + 0.5, mip * 10.0).rgb)
         : clamp(envSampleLOD(R, mip * maxLod) / max(environment_exposure, 1e-4), 0.0, 1.0);
     env *= cRefl;
 
