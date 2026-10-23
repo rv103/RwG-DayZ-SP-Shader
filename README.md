@@ -11,6 +11,8 @@ preview of the DayZ **`_mc` macro**.
 - **`dayz-ingame.glsl`** — a reimplementation of DayZ's actual Super shader and
   in-game lighting, fed by your metal/rough channels converted live the way the
   plugin exports them. **The recommended one.** See below.
+- **`dayz-ingame-specgloss.glsl`** — the same in-game shader for **spec/gloss**
+  projects (Base Color or Diffuse, Specular Level or Specular, Glossiness).
 - **`pbr-metal-rough-mc.glsl`** — the standard metal/rough shading **plus a live
   `_mc` macro preview**.
 - **`dayz-super.glsl`** — the older HDRI-based approximation of the Super
@@ -167,10 +169,39 @@ Not included: bloom, point lights, SSAO, the game's eye adaptation over time.
 
 ---
 
+## `dayz-ingame-specgloss.glsl` — the same for spec/gloss
+
+Same lighting and Super shader as `dayz-ingame`, for texture sets painted in
+spec/gloss. It takes whichever channels the texture set has:
+
+| DayZ | from |
+|------|------|
+| `_co` | Base Color, else Diffuse |
+| `_smdi` G | Specular Level (raw grey), else Specular (its grey value) |
+| `_smdi` B | Glossiness |
+
+**`_smdi` method** (Shader Settings → *Spec/Gloss to DayZ*, set by the plugin):
+
+- **Direct** (default) — Specular → G and Glossiness → B exactly as painted: the
+  classic Arma/DayZ way of painting the `_smdi` yourself (e.g. Base Color +
+  Specular Level + Glossiness channels).
+- **PBR spec/gloss, DayZ shader-matched** — Specular is read as F0 and
+  Glossiness as `1 − roughness` (Painter's *PBR - Specular Glossiness*
+  template), then converted like the metal/rough method (uses specularPower and
+  fresnel N/K).
+
+DayZ's `_smdi` G is one channel: a coloured Specular is reduced to its
+brightness; metal tint comes from the rvmat's fresnel (n,k) and env map. The
+plugin detects spec/gloss texture sets (a Glossiness channel plus
+Specular Level or Specular) and exports these channels the same way.
+
+---
+
 ## Which shader to use
 
 - **Look-dev'ing a DayZ material (metal colour, gloss, fresnel) before you
-  export the `.rvmat`?** → `dayz-ingame`, linked to the plugin.
+  export the `.rvmat`?** → `dayz-ingame`, linked to the plugin
+  (`dayz-ingame-specgloss` if you paint in spec/gloss).
 - **Just painting a normal asset and want to spot your `_mc` accents?** →
   `pbr-metal-rough-mc`.
 - `dayz-super` — only for projects already set up with it.

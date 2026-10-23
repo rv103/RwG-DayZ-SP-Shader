@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **`dayz-ingame-specgloss.glsl`** (new) — `dayz-ingame` for spec/gloss texture
+  sets: `_co` from Base Color or Diffuse, `_smdi` G from Specular Level or
+  Specular, B from Glossiness; `_smdi` method *Direct* (as painted, the classic
+  Arma/DayZ way) or *PBR spec/gloss, DayZ shader-matched*.
+
 ## v0.2.0 (2026-10-21)
 
 - **`dayz-ingame.glsl`** (new) — a reimplementation of DayZ's Super shader and
